@@ -13,6 +13,7 @@ import filecmp
 
 openresty_pkg_url = 'https://github.com/openresty/openresty/releases/download/v1.11.2.2/openresty-1.11.2.2.tar.gz'
 openresty_pkg = 'openresty-1.11.2.2.tar.gz'
+ps_pkg = 'v1.12.34.2-beta.tar.gz'
 
 work_path = os.getcwd()
 
@@ -39,11 +40,14 @@ def install_openresty( ):
         print('### start download openresty package...')
         exec_sys_cmd('rm -rf ' + openresty_pkg)
         exec_sys_cmd( 'wget ' + openresty_pkg_url )
+        exec_sys_cmd( 'test -s v1.12.34.2-beta.tar.gz || wget https://github.com/pagespeed/ngx_pagespeed/archive/v1.12.34.2-beta.tar.gz')
+        exec_sys_cmd( 'test -d ngx-fancyindex || git clone https://github.com/aperezdc/ngx-fancyindex.git')
     else:
         print('### use local openresty package...')
     
     print('### release the package ...')
     exec_sys_cmd( 'tar -xzf ' + openresty_pkg )
+    exec_sys_cmd( 'tar -xzf ' + ps_pkg )
 
     #configure && compile && install openresty
     print('### configure openresty ...')
