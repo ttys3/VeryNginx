@@ -53,7 +53,7 @@ def install_openresty( ):
     #configure && compile && install openresty
     print('### configure openresty ...')
     os.chdir( openresty_pkg.replace('.tar.gz','') )
-    exec_sys_cmd( './configure --prefix=/opt/verynginx/openresty --user=nginx --group=nginx --with-http_v2_module --with-http_sub_module --with-http_stub_status_module --with-luajit --add-module=/root/build/VeryNginx/ngx_pagespeed-1.12.34.2-beta --add-module=/root/build/VeryNginx/ngx-fancyindex' )
+    exec_sys_cmd( './configure --prefix=/opt/verynginx/openresty --user=nginx --group=nginx --with-http_v2_module --with-http_sub_module --with-http_stub_status_module --with-luajit --add-module=/root/build/VeryNginx/ngx_pagespeed-1.12.34.2-beta --add-module=/root/build/VeryNginx/ngx-fancyindex --with-openssl=/root/build/VeryNginx/openresty-1.11.2.2' )
     
     print('### compile openresty ...')
     exec_sys_cmd( 'make' )
