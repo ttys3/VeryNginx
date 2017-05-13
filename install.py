@@ -41,6 +41,7 @@ def install_openresty( ):
         exec_sys_cmd('rm -rf ' + openresty_pkg)
         exec_sys_cmd( 'wget ' + openresty_pkg_url )
         exec_sys_cmd( 'test -s v1.12.34.2-beta.tar.gz || wget https://github.com/pagespeed/ngx_pagespeed/archive/v1.12.34.2-beta.tar.gz')
+        exec_sys_cmd( 'wget https://dl.google.com/dl/page-speed/psol/1.12.34.2.tar.gz && tar -xzvf 1.12.34.2.tar.gz' )
         exec_sys_cmd( 'test -d ngx-fancyindex || git clone https://github.com/aperezdc/ngx-fancyindex.git')
     else:
         print('### use local openresty package...')
@@ -52,7 +53,7 @@ def install_openresty( ):
     #configure && compile && install openresty
     print('### configure openresty ...')
     os.chdir( openresty_pkg.replace('.tar.gz','') )
-    exec_sys_cmd( './configure --prefix=/opt/verynginx/openresty --user=nginx --group=nginx --with-http_v2_module --with-http_sub_module --with-http_stub_status_module --with-luajit --add-module=/root/build/nginx/ngx_pagespeed-1.12.34.2-beta --add-module=/root/build/nginx/ngx-fancyindex' )
+    exec_sys_cmd( './configure --prefix=/opt/verynginx/openresty --user=nginx --group=nginx --with-http_v2_module --with-http_sub_module --with-http_stub_status_module --with-luajit --add-module=/root/build/VeryNginx/ngx_pagespeed-1.12.34.2-beta --add-module=/root/build/VeryNginx/ngx-fancyindex' )
     
     print('### compile openresty ...')
     exec_sys_cmd( 'make' )
