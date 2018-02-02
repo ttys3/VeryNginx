@@ -11,9 +11,9 @@ import sys
 import getopt
 import filecmp
 
-openresty_pkg_url = 'https://github.com/openresty/openresty/releases/download/v1.11.2.2/openresty-1.11.2.2.tar.gz'
-openresty_pkg = 'openresty-1.11.2.2.tar.gz'
-ps_pkg = 'v1.12.34.2-beta.tar.gz'
+openresty_pkg_url = 'https://github.com/openresty/openresty/releases/download/v1.13.6.1/openresty-1.13.6.1.tar.gz'
+openresty_pkg = 'openresty-1.13.6.1.tar.gz'
+ps_pkg = 'v1.13.35.2-beta.tar.gz'
 
 work_path = os.getcwd()
 
@@ -40,8 +40,8 @@ def install_openresty( ):
         print('### start download openresty package...')
         exec_sys_cmd('rm -rf ' + openresty_pkg)
         exec_sys_cmd( 'wget ' + openresty_pkg_url )
-        exec_sys_cmd( 'test -s v1.12.34.2-beta.tar.gz || wget https://github.com/pagespeed/ngx_pagespeed/archive/v1.12.34.2-beta.tar.gz && tar xvzf v1.12.34.2-beta.tar.gz')
-        exec_sys_cmd( 'cd ngx_pagespeed-1.12.34.2-beta && psol_url=$(scripts/format_binary_url.sh PSOL_BINARY_URL) && wget ${psol_url} && tar -xzvf $(basename ${psol_url}) && cd ../' )
+        exec_sys_cmd( 'test -s v1.12.34.2-beta.tar.gz || wget https://github.com/apache/incubator-pagespeed-ngx/archive/v1.13.35.2-beta.tar.gz && tar xvzf v1.13.35.2-beta.tar.gz')
+        exec_sys_cmd( 'cd ngx_pagespeed-1.13.35.2-beta && psol_url=$(scripts/format_binary_url.sh PSOL_BINARY_URL) && wget ${psol_url} && tar -xzvf $(basename ${psol_url}) && cd ../' )
         exec_sys_cmd( 'test -d ngx-fancyindex || git clone https://github.com/aperezdc/ngx-fancyindex.git')
     else:
         print('### use local openresty package...')
