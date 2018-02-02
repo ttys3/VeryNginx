@@ -6,6 +6,45 @@ VeryNginx is a very powerful and friendly nginx .
 ###Notice
 After v0.2 , The entry uri of control panel was moved to `/verynginx/index.html`
 
+## prepare
+
+install aria2
+```bash
+yum -y install aria2 
+```
+alias aria2c='aria2c --conf-path=/etc/aria2.conf'
+
+/etc/aria2.conf content:
+```bash
+###下载相关
+#user agent
+user-agent=Mozilla/5.0 (Windows NT 6.2; WOW64; rv:18.0) Gecko/20100101 Firefox/18.0
+#最大同时下载数(任务数), 路由建议值: 3
+max-concurrent-downloads=10
+#断点续传
+continue=true
+#同服务器连接数
+max-connection-per-server=8
+#最小文件分片大小, 下载线程数上限取决于能分出多少片, 对于小文件重要
+min-split-size=1M
+#单文件最大线程数, 路由建议值: 5
+split=8
+#下载速度限制
+max-overall-download-limit=0
+#单文件速度限制
+max-download-limit=0
+#上传速度限制
+max-overall-upload-limit=0
+#单文件速度限制
+max-upload-limit=0
+#断开速度过慢的连接
+#lowest-speed-limit=0
+
+#定时保存会话，需要1.16.1之后的release版
+save-session-interval=10
+```
+
+
 
 ##Description
 
