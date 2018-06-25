@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Date    : 2016-04-04 23:48
+# @Date    : 2018-06-25
+# @Modify  : HuangYeWuDeng (https://github.com/ihacklog/VeryNginx)
 # @Author  : Alexa (AlexaZhou@163.com)
 # @Link    : https://github.com/alexazhou/VeryNginx
 # @Disc    : install VeryNginx
@@ -10,22 +11,32 @@ import os
 import sys
 import getopt
 import filecmp
+import string
+import multiprocessing
 
-openresty_pkg_url = 'https://github.com/openresty/openresty/releases/download/v1.13.6.1/openresty-1.13.6.1.tar.gz'
-openresty_pkg = 'openresty-1.13.6.1.tar.gz'
-ps_pkg = 'incubator-pagespeed-ngx-1.13.35.2-beta.tar.gz'
+openresty_pkg_url = 'https://openresty.org/download/openresty-1.13.6.2.tar.gz'
+openresty_pkg = 'openresty-1.13.6.2.tar.gz'
+ps_pkg_url = 'https://github.com/apache/incubator-pagespeed-ngx/archive/v1.13.35.2-stable.tar.gz'
+ps_pkg_extract_dir = 'incubator-pagespeed-ngx-1.13.35.2-stable'
+ps_pkg = 'v1.13.35.2-stable.tar.gz'
+downloader_cmd='aria2c --allow-overwrite=true -c --file-allocation=none ' \
+               '--log-level=error -m3 -s16 -x16 --max-file-not-found=3 -k1M ' \
+               '--no-conf -Rtrue --summary-interval=0 -t10 --check-certificate=false'
 
 work_path = os.getcwd()
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 def install_openresty( ):
     #check if the old version of VeryNginx installed( use upcase directory )
     if os.path.exists('/opt/VeryNginx/VeryNginx') == True:
-        print("Seems that a old version of VeryNginx was installed in /opt/verynginx/...\nBefore install, please delete it and backup the configs if you need.")
+        print("Seems that a old version of VeryNginx was installed in /opt/verynginx/...\n" \
+              "Before install, please delete it and backup the configs if you need.")
         sys.exit(1)
     
     #makesure the dir is clean
     print('### makesure the work directory is clean')
-    exec_sys_cmd('rm -rf ' + openresty_pkg.replace('.tar.gz',''))
+    exec_sys_cmd('rm -rf {pkg_name}', pkg_name=openresty_pkg.replace('.tar.gz',''))
     
     #download openresty
     down_flag = True
@@ -38,10 +49,16 @@ def install_openresty( ):
 
     if down_flag == True:
         print('### start download openresty package...')
-        exec_sys_cmd('rm -rf ' + openresty_pkg)
-        exec_sys_cmd( 'aria2c --conf-path=/etc/aria2.conf ' + openresty_pkg_url )
-        exec_sys_cmd( 'test -s incubator-pagespeed-ngx-1.13.35.2-beta.tar.gz || aria2c --conf-path=/etc/aria2.conf https://github.com/apache/incubator-pagespeed-ngx/archive/v1.13.35.2-beta.tar.gz && tar xvzf incubator-pagespeed-ngx-1.13.35.2-beta.tar.gz')
-        exec_sys_cmd( 'cd incubator-pagespeed-ngx-1.13.35.2-beta && psol_url=$(scripts/format_binary_url.sh PSOL_BINARY_URL) && aria2c --conf-path=/etc/aria2.conf ${psol_url} && tar -xzvf $(basename ${psol_url}) && cd ../' )
+        exec_sys_cmd('rm -rf {file}', file=openresty_pkg)
+        download_file(openresty_pkg_url, openresty_pkg)
+        if exec_sys_cmd( 'test -s '+ ps_pkg, allow_fail=True) != True:
+            download_file(ps_pkg_url, ps_pkg)
+        if exec_sys_cmd('test -d ' + ps_pkg_extract_dir, allow_fail=True) != True:
+            exec_sys_cmd( 'tar xvzf ' + ps_pkg)
+        exec_sys_cmd( 'cd {ps_pkg_extract_dir} && ' \
+                      'psol_url=$(scripts/format_binary_url.sh PSOL_BINARY_URL) &&'\
+                      ' {downloader_cmd} $psol_url && tar -xzvf $(basename $psol_url) &&'\
+                      ' cd ../'.format(ps_pkg_extract_dir=ps_pkg_extract_dir, downloader_cmd=downloader_cmd) )
         exec_sys_cmd( 'test -d ngx-fancyindex || git clone https://github.com/aperezdc/ngx-fancyindex.git')
     else:
         print('### use local openresty package...')
@@ -53,10 +70,20 @@ def install_openresty( ):
     #configure && compile && install openresty
     print('### configure openresty ...')
     os.chdir( openresty_pkg.replace('.tar.gz','') )
-    exec_sys_cmd( './configure --prefix=/opt/verynginx/openresty --user=nginx --group=nginx --with-http_v2_module --with-http_sub_module --with-http_stub_status_module --with-luajit --add-module=/root/build/VeryNginx/incubator-pagespeed-ngx-1.13.35.2-beta --add-module=/root/build/VeryNginx/ngx-fancyindex' )
+    exec_sys_cmd( './configure --prefix=/opt/verynginx/openresty' \
+                  ' --user=nginx' \
+                  ' --group=nginx' \
+                  ' --with-http_v2_module' \
+                  ' --with-http_sub_module' \
+                  ' --with-http_stub_status_module' \
+                  ' --with-luajit' \
+                  ' --add-module={ps_ngx_module_dir}' \
+                  ' --add-module={fancyindex_ngx_module_dir}',
+                  ps_ngx_module_dir= dir_path+ "/" + ps_pkg_extract_dir,
+                  fancyindex_ngx_module_dir= dir_path + "/ngx-fancyindex")
     
     print('### compile openresty ...')
-    exec_sys_cmd( 'make' )
+    exec_sys_cmd( 'make -j{cpu_count}', cpu_count=multiprocessing.cpu_count())
     
     print('### install openresty ...')
     exec_sys_cmd( 'make install' )
@@ -73,7 +100,8 @@ def install_verynginx():
 
     #copy nginx config file to openresty
     if os.path.exists('/opt/verynginx/openresty') == True:
-        if filecmp.cmp( '/opt/verynginx/openresty/nginx/conf/nginx.conf', '/opt/verynginx/openresty/nginx/conf/nginx.conf.default', False ) == True:
+        if filecmp.cmp( '/opt/verynginx/openresty/nginx/conf/nginx.conf',
+                        '/opt/verynginx/openresty/nginx/conf/nginx.conf.default', False ) == True:
             print('cp nginx config file to openresty')
             exec_sys_cmd( 'cp -f ./nginx.conf  /opt/verynginx/openresty/nginx/conf/' )
     else:
@@ -86,8 +114,11 @@ def install_verynginx():
 def update_verynginx():
     install_verynginx()    
 
-
-def exec_sys_cmd(cmd, accept_failed = False):
+def exec_sys_cmd(cmdStr, *args, **kwargs):
+    accept_failed = False
+    if 'allow_fail' in kwargs:
+        accept_failed = kwargs.pop('allow_fail')
+    cmd = string.Formatter().vformat(cmdStr, args, kwargs)
     print( cmd )
     ret = os.system( cmd )
     if  ret == 0:
@@ -99,8 +130,18 @@ def exec_sys_cmd(cmd, accept_failed = False):
         else:
             return False
 
+def get_download_cmd(url, savename = ''):
+    cmd = downloader_cmd + " -o {savename} {url}".format(url=url, savename=savename)
+    return cmd
+
+def download_file(url, savename = ''):
+    cmd = get_download_cmd(url, savename)
+    print (cmd)
+    ret = os.system(cmd)
+    return ret
+
 def common_input( s ):
-    if sys.version_info[0] == 3:
+    if sys.version_info.major == 3:
         return input( s )
     else:
         return raw_input( s )
