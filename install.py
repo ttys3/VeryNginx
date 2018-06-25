@@ -83,7 +83,7 @@ def install_openresty( ):
                   fancyindex_ngx_module_dir= dir_path + "/ngx-fancyindex")
     
     print('### compile openresty ...')
-    exec_sys_cmd( 'make -j{cpu_count}', cpu_count=multiprocessing.cpu_count())
+    exec_sys_cmd( 'make -j{cpu_count}', cpu_count=multiprocessing.cpu_count()+1)
     
     print('### install openresty ...')
     exec_sys_cmd( 'make install' )
