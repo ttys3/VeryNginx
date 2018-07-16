@@ -1,6 +1,10 @@
 # VeryNginx
 VeryNginx is a very powerful and friendly nginx .
 
+this is a fork of https://github.com/alexazhou/VeryNginx
+
+and made some changes.
+
 [中文文档](https://github.com/alexazhou/VeryNginx/blob/master/readme_zh.md)
 
 ###Notice
